@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Court Check-Up</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #6b6b67;
+    --color-text-tertiary: #a8a8a3;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f4ef;
+    --color-border-primary: #c0bfb8;
+    --color-border-secondary: #d4d3cc;
+    --color-border-tertiary: #e8e7e1;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--color-background-secondary); color: var(--color-text-primary); min-height: 100vh; }
+  .shell { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+  .hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem; }
+  .hdr-icon { width: 40px; height: 40px; background: #639922; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; }
+  .hdr h1 { font-size: 22px; font-weight: 600; color: var(--color-text-primary); }
+  .hdr p { font-size: 13px; color: var(--color-text-secondary); }
+  .nav { display: flex; gap: 2px; margin-bottom: 1.75rem; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; padding: 0 8px; }
+  .tab { padding: 10px 16px; font-size: 13px; cursor: pointer; background: none; border: none; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; font-family: var(--font-sans); }
+  .tab.active { color: #3B6D11; border-bottom-color: #639922; font-weight: 500; }
+  .tab:hover:not(.active) { color: var(--color-text-primary); }
+  .sec { display: none; } .sec.active { display: block; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .card-h2 { font-size: 15px; font-weight: 500; margin-bottom: 1rem; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width:480px){ .form-grid { grid-template-columns: 1fr; } }
+  .fg { display: flex; flex-direction: column; gap: 4px; }
+  .fg label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+  .fg input, .fg textarea, .fg select { font-size: 14px; color: var(--color-text-primary); background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; width: 100%; font-family: var(--font-sans); resize: vertical; }
+  .fg textarea { min-height: 72px; }
+  .fg input:focus, .fg textarea:focus, .fg select:focus { outline: none; border-color: #639922; }
+  .sec-lbl { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width:480px){ .cat-grid { grid-template-columns: 1fr; } }
+  .cat-item { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .cat-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .sr-row { display: flex; gap: 1px; align-items: center; }
+  .sr { background: none; border: none; cursor: pointer; font-size: 22px; padding: 2px; line-height: 1; color: #ddd; transition: transform .1s; }
+  .sr:hover { transform: scale(1.2); }
+  .sr-lbl { font-size: 10px; color: var(--color-text-secondary); margin-left: 4px; min-width: 56px; }
+  .btn-trio { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn-opt { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); font-family: var(--font-sans); transition: all .15s; }
+  .btn-opt.selected { background: #EAF3DE; border-color: #639922; color: #27500A; font-weight: 500; }
+  .btn-primary { background: #639922; color: white; border: none; border-radius: var(--border-radius-md); padding: 9px 20px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+  .btn-primary:hover { background: #3B6D11; }
+  .btn-sec { background: none; color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 9px 20px; font-size: 14px; cursor: pointer; font-family: var(--font-sans); }
+  .actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .stat { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 14px 16px; }
+  .stat-lbl { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .stat-val { font-size: 24px; font-weight: 600; color: var(--color-text-primary); }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+  .filter-row input { font-size: 13px; padding: 7px 10px; flex: 1; min-width: 140px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); color: var(--color-text-primary); font-family: var(--font-sans); }
+  .srt { font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); font-family: var(--font-sans); }
+  .court-list { display: flex; flex-direction: column; gap: 14px; }
+  .cc { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .cc-thumb-ph { width: 100%; height: 140px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 36px; }
+  .cc-body { padding: 1rem 1.25rem; }
+  .cc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .cc-name { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+  .cc-loc { font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .cc-addr { font-size: 12px; margin-top: 5px; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 5px; }
+  .cc-addr a { color: #185FA5; text-decoration: none; line-height: 1.4; }
+  .cc-addr a:hover { text-decoration: underline; }
+  .cc-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 500; }
+  .b-green { background: #EAF3DE; color: #27500A; }
+  .b-blue { background: #E6F1FB; color: #0C447C; }
+  .b-amber { background: #FAEEDA; color: #633806; }
+  .b-red { background: #FCEBEB; color: #791F1F; }
+  .b-teal { background: #E1F5EE; color: #085041; }
+  .b-gray { background: #F1EFE8; color: #444441; }
+  .cat-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  .cs-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .cs-name { color: var(--color-text-secondary); }
+  .review-txt { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 10px; font-style: italic; }
+  .cc-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .cc-date { font-size: 11px; color: var(--color-text-tertiary); }
+  .cc-actions { display: flex; gap: 4px; }
+  .del-btn, .edit-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: var(--border-radius-sm); }
+  .del-btn { color: var(--color-text-tertiary); } .del-btn:hover { color: #E24B4A; background: #FCEBEB; }
+  .edit-btn { color: var(--color-text-tertiary); } .edit-btn:hover { color: #185FA5; background: #E6F1FB; }
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--color-text-secondary); font-size: 14px; }
+  .empty i { font-size: 44px; display: block; margin-bottom: 12px; color: var(--color-border-secondary); }
+  .upload-zone { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 1.5rem; text-align: center; cursor: pointer; margin-bottom: 8px; transition: background .15s; }
+  .upload-zone:hover { background: var(--color-background-secondary); }
+  .media-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .media-thumb { position: relative; width: 82px; height: 82px; border-radius: var(--border-radius-md); overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
+  .media-thumb img, .media-thumb video { width: 100%; height: 100%; object-fit: cover; }
+  .media-thumb .rm { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,.55); border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; }
+  .media-thumb .tp { position: absolute; bottom: 2px; left: 2px; background: rgba(0,0,0,.55); border: none; border-radius: 999px; padding: 2px 6px; cursor: pointer; font-size: 9px; color: white; font-family: var(--font-sans); }
+  .media-thumb.is-thumb { outline: 2.5px solid #639922; }
+  .form-msg { font-size: 13px; margin-top: 10px; color: #3B6D11; display: none; font-weight: 500; }
+  .cover-wrap { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .cover-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; }
+  .cover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .cover-card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .cover-card:hover { border-color: #639922; box-shadow: 0 2px 8px rgba(99,153,34,.15); }
+  .cover-img { width: 100%; height: 120px; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 28px; overflow: hidden; }
+  .cover-img img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-info { padding: 10px 12px; background: var(--color-background-primary); }
+  .cover-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cover-loc { font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cover-rating { display: flex; align-items: center; gap: 4px; margin-top: 5px; }
+  .detail-overlay { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .detail-back { background: none; border: none; cursor: pointer; color: #185FA5; font-size: 13px; display: flex; align-items: center; gap: 4px; margin-bottom: 1rem; font-family: var(--font-sans); }
+  .detail-img { width: 100%; height: 210px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 44px; overflow: hidden; }
+  .detail-img img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1rem 0; }
+  .dcat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .dcat-name { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  .map-box { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .map-box-title { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .map-search-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .map-search-row input { flex: 1; font-size: 14px; color: var(--color-text-primary); background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 9px 12px; font-family: var(--font-sans); }
+  .map-search-row input:focus { outline: none; border-color: #639922; }
+  .map-go-btn { background: #639922; color: white; border: none; border-radius: var(--border-radius-md); padding: 9px 16px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .map-go-btn:hover { background: #3B6D11; }
+  .court-pin { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 14px; margin-bottom: 8px; }
+  .court-pin:last-child { margin-bottom: 0; }
+  .pin-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .pin-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .pin-neighborhood { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .pin-addr-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #185FA5; text-decoration: none; margin-top: 6px; padding: 4px 10px; background: #E6F1FB; border-radius: var(--border-radius-md); }
+  .pin-addr-link:hover { background: #B5D4F4; }
+  .pin-no-addr-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #444441; text-decoration: none; margin-top: 6px; padding: 4px 10px; background: #F1EFE8; border-radius: var(--border-radius-md); }
+  .pin-no-addr-link:hover { background: #e0dfd8; }
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+  .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--color-text-tertiary); font-family: var(--font-sans); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<div class="hdr">
+  <div class="hdr-icon"><i class="ti ti-ball-basketball"></i></div>
+  <div>
+    <h1>Court Check-Up</h1>
+    <p>Your local basketball court journal</p>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="tab active" onclick="showTab('cover',this)"><i class="ti ti-layout-grid"></i> Cover</button>
+  <button class="tab" onclick="showTab('courts',this)"><i class="ti ti-list"></i> My Courts</button>
+  <button class="tab" onclick="showTab('add',this)"><i class="ti ti-plus"></i> Add Court</button>
+  <button class="tab" onclick="showTab('map',this)"><i class="ti ti-map-pin"></i> Map</button>
+</div>
+
+<!-- COVER -->
+<div id="tab-cover" class="sec active">
+  <div id="cover-detail" style="display:none"></div>
+  <div id="cover-main">
+    <div class="cover-wrap">
+      <div class="cover-hdr">
+        <div>
+          <div style="font-size:20px;font-weight:600;color:var(--color-text-primary)">All Courts</div>
+          <div style="font-size:13px;color:var(--color-text-secondary)" id="cover-sub">Your reviewed basketball spots</div>
+        </div>
+        <select class="srt" id="cover-sort" onchange="renderCover()">
+          <option value="newest">Newest</option>
+          <option value="rating-high">Top rated</option>
+          <option value="name">A → Z</option>
+        </select>
+      </div>
+      <div class="cover-grid" id="cover-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MY COURTS -->
+<div id="tab-courts" class="sec">
+  <div class="stats-row" id="stats-row"></div>
+  <div class="filter-row">
+    <input type="text" id="search-input" placeholder="Search by name, neighborhood, or address…" oninput="renderCourts()">
+    <select class="srt" id="sort-select" onchange="renderCourts()">
+      <option value="newest">Newest first</option>
+      <option value="rating-high">Highest rated</option>
+      <option value="rating-low">Lowest rated</option>
+      <option value="name">A → Z</option>
+    </select>
+  </div>
+  <div class="court-list" id="court-list"></div>
+</div>
+
+<!-- ADD COURT -->
+<div id="tab-add" class="sec">
+<div class="card">
+  <div class="card-h2"><i class="ti ti-map-pin-plus"></i> Add a new court</div>
+  <div class="form-grid">
+    <div class="fg"><label>Court name *</label><input type="text" id="f-name" placeholder="e.g. Hollenbeck Park Courts"></div>
+    <div class="fg"><label>Neighborhood</label><input type="text" id="f-location" placeholder="e.g. Boyle Heights"></div>
+  </div>
+  <div class="fg" style="margin-bottom:12px">
+    <label>Street address</label>
+    <input type="text" id="f-address" placeholder="e.g. 415 S St Louis St, Los Angeles, CA 90033">
+  </div>
+  <div class="form-grid">
+    <div class="fg"><label>Surface</label>
+      <select id="f-surface">
+        <option value="">— select —</option>
+        <option>Asphalt</option><option>Concrete</option><option>Hardwood (indoor)</option><option>Rubber</option><option>Dirt</option>
+      </select>
+    </div>
+    <div class="fg"><label>Hoops</label>
+      <select id="f-hoops">
+        <option value="">— select —</option>
+        <option>Full court</option>
+        <option>Half court</option>
+        <option>Multiple courts – full courts</option>
+        <option>Multiple courts – half courts</option>
+        <option>Multiple courts – mix</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="fg"><label>Lights at night?</label>
+      <select id="f-lights"><option value="">— unknown —</option><option>Yes</option><option>No</option></select>
+    </div>
+    <div class="fg"><label>Crowd level</label>
+      <select id="f-crowd"><option value="">— varies —</option><option>Usually quiet</option><option>Moderate</option><option>Usually crowded</option></select>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="fg"><label>Parking</label>
+      <select id="f-parking">
+        <option value="">— unknown —</option>
+        <option>Free &amp; ample</option><option>Limited free parking</option><option>Street parking</option><option>Pay parking</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Bathroom</label>
+      <div class="btn-trio" id="bathroom-btns">
+        <button class="btn-opt" onclick="setBathroom('Yes')">Yes</button>
+        <button class="btn-opt" onclick="setBathroom('No')">No</button>
+        <button class="btn-opt" onclick="setBathroom('Unsure')">Unsure</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec-lbl" style="margin-top:4px">Category ratings</div>
+  <div class="cat-grid" id="cat-form-grid"></div>
+  <div class="fg" style="margin-bottom:12px">
+    <label>Review / notes</label>
+    <textarea id="f-review" placeholder="Hoop condition, run quality, what to expect…"></textarea>
+  </div>
+  <div class="sec-lbl">Photos &amp; videos</div>
+  <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+    <i class="ti ti-cloud-upload" style="font-size:28px;color:var(--color-text-tertiary)"></i>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin-top:6px">Click to upload photos or short videos</p>
+    <p style="font-size:12px;color:var(--color-text-tertiary);margin-top:3px">JPG, PNG, MP4 — tap "cover" on a photo to set thumbnail</p>
+  </div>
+  <input type="file" id="file-input" multiple accept="image/*,video/mp4" style="display:none" onchange="handleFiles(event)">
+  <div class="media-grid" id="media-grid"></div>
+  <div class="actions">
+    <button class="btn-primary" id="save-btn" onclick="saveCourt()">Save court</button>
+    <button class="btn-sec" onclick="clearForm()">Clear</button>
+  </div>
+  <p class="form-msg" id="form-msg"></p>
+</div>
+</div>
+
+<!-- MAP -->
+<div id="tab-map" class="sec">
+  <div class="map-box">
+    <div class="map-box-title"><i class="ti ti-search"></i> Search any address</div>
+    <div class="map-search-row">
+      <input type="text" id="map-addr-input" placeholder="Enter an address, park, or court name…" onkeydown="if(event.key==='Enter')openMapAddr()">
+      <button class="map-go-btn" onclick="openMapAddr()"><i class="ti ti-map-pin"></i> Open in Maps</button>
+    </div>
+    <p id="map-addr-hint" style="font-size:12px;color:var(--color-text-tertiary)">Type any address or place and it will open in Google Maps.</p>
+  </div>
+  <div class="map-box">
+    <div class="map-box-title"><i class="ti ti-bookmark"></i> Your saved courts</div>
+    <div id="map-pins-list"></div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span><i class="ti ti-pencil"></i> Edit court</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="edit-modal-body"></div>
+  </div>
+</div>
+
+<script>
+const CATS=[
+  {k:'skill',        l:'Skill level',    icon:'ti-user'},
+  {k:'amenities',    l:'Amenities',      icon:'ti-armchair'},
+  {k:'accessibility',l:'Accessibility',  icon:'ti-accessible'},
+  {k:'people',       l:'People vibe',    icon:'ti-mood-smile'}
+];
+const STAR_COLORS=['#C0392B','#E07070','#F4A7B9','#7BBF6A','#27AE60'];
+const STAR_LABELS=['','Avoid','Not great','Decent','Good','Must visit'];
+const pkBadge={'Free & ample':'b-green','Limited free parking':'b-amber','Street parking':'b-teal','Pay parking':'b-red'};
+const bathBadge={'Yes':'b-green','No':'b-red','Unsure':'b-gray'};
+const SK='court_checkup_data';
+
+let courts=[], ratings={}, bathroomVal='', mediaFiles=[], thumbIndex=-1, editingId=null;
+CATS.forEach(c=>ratings[c.k]=0);
+
+// ── PERSISTENCE (localStorage) ──
+function loadCourts(){
+  try{ courts=JSON.parse(localStorage.getItem(SK)||'[]'); }catch(e){ courts=[]; }
+  buildCatForm(); renderAll();
+}
+function saveCourts(){
+  try{ localStorage.setItem(SK, JSON.stringify(courts)); }catch(e){ alert('Storage error — your browser may be blocking localStorage.'); }
+}
+
+// ── EXPORT / IMPORT ──
+function exportData(){
+  const blob=new Blob([JSON.stringify(courts,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='court-checkup-backup.json'; a.click();
+}
+function importData(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange=e=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const data=JSON.parse(ev.target.result);
+        if(Array.isArray(data)){ courts=data; saveCourts(); renderAll(); alert(`Imported ${data.length} courts!`); }
+        else alert('Invalid backup file.');
+      }catch(err){ alert('Could not read file.'); }
+    };
+    r.readAsText(e.target.files[0]);
+  };
+  inp.click();
+}
+
+// ── FORM ──
+function buildCatForm(prefix=''){
+  const g=document.getElementById(prefix+'cat-form-grid'); if(!g)return;
+  g.innerHTML=CATS.map(cat=>`
+    <div class="cat-item">
+      <div class="cat-label"><i class="ti ${cat.icon}" style="font-size:14px"></i> ${cat.l}</div>
+      <div class="sr-row" id="${prefix}sr-${cat.k}">
+        ${[1,2,3,4,5].map(v=>`<button class="sr" onclick="setRating('${cat.k}',${v},'${prefix}')" aria-label="${v} star">★</button>`).join('')}
+        <span class="sr-lbl" id="${prefix}lbl-${cat.k}"></span>
+      </div>
+    </div>`).join('');
+}
+
+function setRating(cat,n,prefix=''){
+  if(prefix==='') ratings[cat]=n;
+  else editRatings[cat]=n;
+  const row=document.getElementById(prefix+'sr-'+cat); if(!row)return;
+  row.querySelectorAll('.sr').forEach((b,i)=>{ b.style.color=i<n?STAR_COLORS[n-1]:'#ddd'; });
+  const lbl=document.getElementById(prefix+'lbl-'+cat);
+  if(lbl) lbl.textContent=STAR_LABELS[n]||'';
+}
+
+function setBathroom(val,prefix=''){
+  if(prefix==='') bathroomVal=val;
+  else editBathroomVal=val;
+  document.querySelectorAll('#'+(prefix||'')+'bathroom-btns .btn-opt').forEach(b=>{
+    b.classList.toggle('selected', b.textContent.trim()===val);
+  });
+}
+
+function handleFiles(e, prefix=''){
+  Array.from(e.target.files).forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const isVid=f.type.startsWith('video');
+      if(prefix==='edit-'){
+        editMediaFiles.push({name:f.name,dataUrl:ev.target.result,isVid});
+        if(editThumbIndex===-1&&!isVid) editThumbIndex=editMediaFiles.length-1;
+        renderMediaGrid('edit-');
+      } else {
+        mediaFiles.push({name:f.name,dataUrl:ev.target.result,isVid});
+        if(thumbIndex===-1&&!isVid) thumbIndex=mediaFiles.length-1;
+        renderMediaGrid('');
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+  e.target.value='';
+}
+
+function renderMediaGrid(prefix=''){
+  const arr=prefix==='edit-'?editMediaFiles:mediaFiles;
+  const ti=prefix==='edit-'?editThumbIndex:thumbIndex;
+  const g=document.getElementById(prefix+'media-grid'); if(!g)return;
+  g.innerHTML=arr.map((m,i)=>`
+    <div class="media-thumb${i===ti?' is-thumb':''}">
+      ${m.isVid?`<video src="${m.dataUrl}" muted playsinline></video>`:`<img src="${m.dataUrl}" alt="${m.name}">`}
+      <button class="rm" onclick="removeMedia(${i},'${prefix}')" aria-label="Remove"><i class="ti ti-x" style="font-size:9px"></i></button>
+      ${!m.isVid?`<button class="tp" onclick="setThumbLocal(${i},'${prefix}')">cover</button>`:''}
+    </div>`).join('');
+}
+
+function removeMedia(i,prefix=''){
+  if(prefix==='edit-'){ editMediaFiles.splice(i,1); editThumbIndex=editMediaFiles.findIndex(m=>!m.isVid); renderMediaGrid('edit-'); }
+  else { mediaFiles.splice(i,1); thumbIndex=mediaFiles.findIndex(m=>!m.isVid); renderMediaGrid(''); }
+}
+function setThumbLocal(i,prefix=''){
+  if(prefix==='edit-'){ editThumbIndex=i; renderMediaGrid('edit-'); }
+  else { thumbIndex=i; renderMediaGrid(''); }
+}
+
+function gv(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+function saveCourt(){
+  const name=gv('f-name'); if(!name){ alert('Please enter a court name.'); return; }
+  const thumb=thumbIndex>=0&&mediaFiles[thumbIndex]?mediaFiles[thumbIndex].dataUrl:null;
+  const cats={}; CATS.forEach(c=>cats[c.k]=ratings[c.k]);
+  const vals=Object.values(cats).filter(x=>x>0);
+  const overall=vals.length?parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)):0;
+  courts.unshift({
+    id:Date.now(), name,
+    location:gv('f-location'), address:gv('f-address'),
+    surface:gv('f-surface'), hoops:gv('f-hoops'),
+    lights:gv('f-lights'), crowd:gv('f-crowd'),
+    parking:gv('f-parking'), bathroom:bathroomVal,
+    overall, cats,
+    review:gv('f-review'),
+    thumb, mediaCount:mediaFiles.length,
+    date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  });
+  saveCourts(); clearForm();
+  const msg=document.getElementById('form-msg');
+  msg.textContent=`"${name}" saved!`; msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',2500);
+  renderAll();
+}
+
+function clearForm(){
+  ['f-name','f-location','f-address','f-review'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+  ['f-surface','f-hoops','f-lights','f-crowd','f-parking'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+  CATS.forEach(c=>{ ratings[c.k]=0; setRating(c.k,0,''); });
+  bathroomVal='';
+  document.querySelectorAll('#bathroom-btns .btn-opt').forEach(b=>b.classList.remove('selected'));
+  mediaFiles=[]; thumbIndex=-1; editingId=null;
+  renderMediaGrid('');
+  document.getElementById('save-btn').textContent='Save court';
+}
+
+// ── EDIT ──
+let editRatings={}, editBathroomVal='', editMediaFiles=[], editThumbIndex=-1;
+CATS.forEach(c=>editRatings[c.k]=0);
+
+function openEditModal(id){
+  const c=courts.find(x=>x.id===id); if(!c)return;
+  editRatings={}; CATS.forEach(cat=>editRatings[cat.k]=c.cats[cat.k]||0);
+  editBathroomVal=c.bathroom||'';
+  editMediaFiles=c.thumb?[{name:'thumb',dataUrl:c.thumb,isVid:false}]:[];
+  editThumbIndex=editMediaFiles.length?0:-1;
+
+  const body=document.getElementById('edit-modal-body');
+  body.innerHTML=`
+    <div class="form-grid">
+      <div class="fg"><label>Court name *</label><input type="text" id="e-name" value="${esc(c.name)}"></div>
+      <div class="fg"><label>Neighborhood</label><input type="text" id="e-location" value="${esc(c.location||'')}"></div>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Street address</label>
+      <input type="text" id="e-address" value="${esc(c.address||'')}">
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>Surface</label>
+        <select id="e-surface">
+          <option value="">— select —</option>
+          ${['Asphalt','Concrete','Hardwood (indoor)','Rubber','Dirt'].map(o=>`<option${c.surface===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg"><label>Hoops</label>
+        <select id="e-hoops">
+          <option value="">— select —</option>
+          ${['Full court','Half court','Multiple courts – full courts','Multiple courts – half courts','Multiple courts – mix'].map(o=>`<option${c.hoops===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>Lights at night?</label>
+        <select id="e-lights">
+          <option value="">— unknown —</option>
+          ${['Yes','No'].map(o=>`<option${c.lights===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg"><label>Crowd level</label>
+        <select id="e-crowd">
+          <option value="">— varies —</option>
+          ${['Usually quiet','Moderate','Usually crowded'].map(o=>`<option${c.crowd===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="fg"><label>Parking</label>
+        <select id="e-parking">
+          <option value="">— unknown —</option>
+          ${['Free & ample','Limited free parking','Street parking','Pay parking'].map(o=>`<option${c.parking===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg">
+        <label>Bathroom</label>
+        <div class="btn-trio" id="edit-bathroom-btns">
+          ${['Yes','No','Unsure'].map(v=>`<button class="btn-opt${c.bathroom===v?' selected':''}" onclick="setBathroom('${v}','edit-')">${v}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="sec-lbl" style="margin-top:4px">Category ratings</div>
+    <div class="cat-grid" id="edit-cat-form-grid"></div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Review / notes</label>
+      <textarea id="e-review">${esc(c.review||'')}</textarea>
+    </div>
+    <div class="sec-lbl">Cover photo</div>
+    <div class="upload-zone" onclick="document.getElementById('edit-file-input').click()" style="margin-bottom:8px">
+      <i class="ti ti-cloud-upload" style="font-size:24px;color:var(--color-text-tertiary)"></i>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">Click to replace or add photos</p>
+    </div>
+    <input type="file" id="edit-file-input" multiple accept="image/*,video/mp4" style="display:none" onchange="handleFiles(event,'edit-')">
+    <div class="media-grid" id="edit-media-grid"></div>
+    <div class="actions">
+      <button class="btn-primary" onclick="saveEdit(${id})">Save changes</button>
+      <button class="btn-sec" onclick="closeEditModal()">Cancel</button>
+    </div>
+    <p class="form-msg" id="edit-form-msg"></p>
+  `;
+  buildCatForm('edit-');
+  CATS.forEach(cat=>setRating(cat.k, editRatings[cat.k]||0, 'edit-'));
+  renderMediaGrid('edit-');
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function saveEdit(id){
+  const name=gv('e-name'); if(!name){ alert('Court name required.'); return; }
+  const idx=courts.findIndex(x=>x.id===id); if(idx<0)return;
+  const thumb=editThumbIndex>=0&&editMediaFiles[editThumbIndex]?editMediaFiles[editThumbIndex].dataUrl:courts[idx].thumb;
+  const cats={}; CATS.forEach(c=>cats[c.k]=editRatings[c.k]);
+  const vals=Object.values(cats).filter(x=>x>0);
+  const overall=vals.length?parseFloat((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1)):0;
+  courts[idx]={...courts[idx], name, location:gv('e-location'), address:gv('e-address'),
+    surface:gv('e-surface'), hoops:gv('e-hoops'), lights:gv('e-lights'), crowd:gv('e-crowd'),
+    parking:gv('e-parking'), bathroom:editBathroomVal,
+    overall, cats, review:gv('e-review'), thumb,
+    edited:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+  };
+  saveCourts(); renderAll(); closeEditModal();
+}
+
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ── DELETE ──
+function deleteCourt(id){
+  if(!confirm('Remove this court?')) return;
+  courts=courts.filter(c=>c.id!==id); saveCourts(); renderAll();
+}
+
+// ── STARS HTML ──
+function starsHtml(n,size){
+  if(!n) return`<span style="font-size:12px;color:var(--color-text-tertiary)">—</span>`;
+  const col=STAR_COLORS[Math.min(Math.round(n),5)-1]||STAR_COLORS[2];
+  const full=Math.round(n);
+  return`<span style="color:${col};font-size:${size||14}px">${'★'.repeat(full)}${'☆'.repeat(5-full)}</span>`;
+}
+
+function mapsUrl(c){
+  return'https://www.google.com/maps/search/'+encodeURIComponent(c.address||c.location||c.name);
+}
+
+// ── TABS ──
+function showTab(t,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(t==='map') renderMap();
+  if(t==='cover') renderCover();
+}
+
+// ── RENDER ALL ──
+function renderAll(){ renderStats(); renderCourts(); renderCover(); }
+
+function renderStats(){
+  const total=courts.length;
+  const rated=courts.filter(c=>c.overall>0);
+  const avg=rated.length?(rated.reduce((s,c)=>s+c.overall,0)/rated.length).toFixed(1):'—';
+  const top=courts.filter(c=>c.overall>=4).length;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat"><div class="stat-lbl">Courts saved</div><div class="stat-val">${total}</div></div>
+    <div class="stat"><div class="stat-lbl">Avg rating</div><div class="stat-val">${avg}</div></div>
+    <div class="stat"><div class="stat-lbl">Favorites (4★+)</div><div class="stat-val">${top}</div></div>`;
+}
+
+function renderCourts(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const sort=document.getElementById('sort-select').value;
+  let list=courts.filter(c=>
+    c.name.toLowerCase().includes(q)||
+    (c.location||'').toLowerCase().includes(q)||
+    (c.address||'').toLowerCase().includes(q)
+  );
+  if(sort==='rating-high') list.sort((a,b)=>b.overall-a.overall);
+  else if(sort==='rating-low') list.sort((a,b)=>a.overall-b.overall);
+  else if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  const el=document.getElementById('court-list');
+  if(!list.length){
+    el.innerHTML=`<div class="empty"><i class="ti ti-ball-basketball"></i>${courts.length===0?'No courts yet — add your first one!':'No courts match your search.'}</div>`;
+    return;
+  }
+  el.innerHTML=list.map(c=>`
+    <div class="cc">
+      ${c.thumb?`<img style="width:100%;height:140px;object-fit:cover;display:block" src="${c.thumb}" alt="${esc(c.name)}">`:`<div class="cc-thumb-ph"><i class="ti ti-ball-basketball"></i></div>`}
+      <div class="cc-body">
+        <div class="cc-top">
+          <div>
+            <div class="cc-name">${esc(c.name)}</div>
+            ${c.location?`<div class="cc-loc"><i class="ti ti-map-pin" style="font-size:12px"></i>${esc(c.location)}</div>`:''}
+          </div>
+          ${starsHtml(c.overall,15)}
+        </div>
+        ${c.address?`<div class="cc-addr"><i class="ti ti-map-2" style="font-size:13px;color:var(--color-text-tertiary);margin-top:1px;flex-shrink:0"></i><a href="${mapsUrl(c)}" target="_blank">${esc(c.address)}</a></div>`:''}
+        <div class="cc-meta">
+          ${c.surface?`<span class="badge b-green">${esc(c.surface)}</span>`:''}
+          ${c.hoops?`<span class="badge b-amber">${esc(c.hoops)}</span>`:''}
+          ${c.lights==='Yes'?`<span class="badge b-blue"><i class="ti ti-bulb"></i> Lights</span>`:''}
+          ${c.parking?`<span class="badge ${pkBadge[c.parking]||'b-gray'}"><i class="ti ti-car"></i> ${esc(c.parking)}</span>`:''}
+          ${c.bathroom?`<span class="badge ${bathBadge[c.bathroom]||'b-gray'}"><i class="ti ti-building-community"></i> Bathroom: ${c.bathroom}</span>`:''}
+          ${c.crowd==='Usually crowded'?`<span class="badge b-red">Crowded</span>`:''}
+          ${c.crowd==='Usually quiet'?`<span class="badge b-teal">Quiet</span>`:''}
+          ${c.mediaCount?`<span class="badge b-gray"><i class="ti ti-photo"></i> ${c.mediaCount}</span>`:''}
+        </div>
+        <div class="cat-scores">
+          ${CATS.map(cat=>`<div class="cs-item"><span class="cs-name">${cat.l}</span>${starsHtml(c.cats[cat.k],12)}</div>`).join('')}
+        </div>
+        ${c.review?`<div class="review-txt">"${esc(c.review)}"</div>`:''}
+        <div class="cc-footer">
+          <span class="cc-date">Added ${c.date}${c.edited?' · Edited '+c.edited:''}</span>
+          <div class="cc-actions">
+            <button class="edit-btn" onclick="openEditModal(${c.id})" title="Edit"><i class="ti ti-pencil"></i></button>
+            <button class="del-btn" onclick="deleteCourt(${c.id})" title="Delete"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderCover(){
+  const sort=document.getElementById('cover-sort')?.value||'newest';
+  let list=[...courts];
+  if(sort==='rating-high') list.sort((a,b)=>b.overall-a.overall);
+  else if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  const sub=document.getElementById('cover-sub');
+  if(sub) sub.textContent=`${list.length} court${list.length!==1?'s':''} reviewed`;
+  const g=document.getElementById('cover-grid'); if(!g)return;
+  if(!list.length){
+    g.innerHTML=`<div class="empty" style="grid-column:1/-1"><i class="ti ti-ball-basketball"></i>No courts yet — add your first one!</div>`;
+    return;
+  }
+  g.innerHTML=list.map(c=>`
+    <div class="cover-card" onclick="showDetail(${c.id})">
+      <div class="cover-img">${c.thumb?`<img src="${c.thumb}" alt="${esc(c.name)}">`:`<i class="ti ti-ball-basketball"></i>`}</div>
+      <div class="cover-info">
+        <div class="cover-name">${esc(c.name)}</div>
+        <div class="cover-loc">${esc(c.location||c.address||'Location not set')}</div>
+        <div class="cover-rating">${starsHtml(c.overall,12)}<span style="font-size:11px;color:var(--color-text-secondary);margin-left:3px">${c.overall?c.overall+'/5':''}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+function showDetail(id){
+  const c=courts.find(x=>x.id===id); if(!c)return;
+  document.getElementById('cover-detail').style.display='block';
+  document.getElementById('cover-main').style.display='none';
+  document.getElementById('cover-detail').innerHTML=`
+    <div class="detail-overlay">
+      <button class="detail-back" onclick="backToCover()"><i class="ti ti-arrow-left" style="font-size:14px"></i> All courts</button>
+      <div class="detail-img">${c.thumb?`<img src="${c.thumb}" alt="${esc(c.name)}">`:`<i class="ti ti-ball-basketball"></i>`}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">
+        <div>
+          <div style="font-size:20px;font-weight:600;color:var(--color-text-primary)">${esc(c.name)}</div>
+          ${c.location?`<div style="font-size:13px;color:var(--color-text-secondary);display:flex;align-items:center;gap:4px;margin-top:3px"><i class="ti ti-map-pin" style="font-size:12px"></i>${esc(c.location)}</div>`:''}
+        </div>
+        ${starsHtml(c.overall,20)}
+      </div>
+      ${c.address?`<a href="${mapsUrl(c)}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#185FA5;text-decoration:none;margin-bottom:12px;padding:5px 12px;background:#E6F1FB;border-radius:var(--border-radius-md)"><i class="ti ti-map-2" style="font-size:13px"></i>${esc(c.address)}<i class="ti ti-external-link" style="font-size:11px;opacity:.7"></i></a>`:''}
+      <div class="cc-meta" style="margin-bottom:12px">
+        ${c.surface?`<span class="badge b-green">${esc(c.surface)}</span>`:''}
+        ${c.hoops?`<span class="badge b-amber">${esc(c.hoops)}</span>`:''}
+        ${c.lights==='Yes'?`<span class="badge b-blue"><i class="ti ti-bulb"></i> Lights</span>`:''}
+        ${c.parking?`<span class="badge ${pkBadge[c.parking]||'b-gray'}"><i class="ti ti-car"></i> ${esc(c.parking)}</span>`:''}
+        ${c.bathroom?`<span class="badge ${bathBadge[c.bathroom]||'b-gray'}"><i class="ti ti-building-community"></i> Bathroom: ${c.bathroom}</span>`:''}
+      </div>
+      <div class="detail-cat-grid">
+        ${CATS.map(cat=>`<div class="dcat"><div class="dcat-name">${cat.l}</div><div style="margin-top:4px">${starsHtml(c.cats[cat.k],18)}</div></div>`).join('')}
+      </div>
+      ${c.review?`<div style="font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin-top:12px;font-style:italic">"${esc(c.review)}"</div>`:''}
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:12px">Added ${c.date}${c.edited?' · Edited '+c.edited:''}</div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="openEditModal(${c.id})"><i class="ti ti-pencil"></i> Edit</button>
+        <button class="btn-sec" style="font-size:13px;padding:7px 14px" onclick="backToCover()">Back</button>
+      </div>
+    </div>`;
+}
+
+function backToCover(){
+  document.getElementById('cover-detail').style.display='none';
+  document.getElementById('cover-main').style.display='block';
+}
+
+function renderMap(){
+  const el=document.getElementById('map-pins-list');
+  if(!courts.length){
+    el.innerHTML=`<div class="empty" style="padding:1rem 0"><i class="ti ti-bookmark"></i>No courts saved yet.</div>`;
+    return;
+  }
+  el.innerHTML=courts.map(c=>`
+    <div class="court-pin">
+      <div class="pin-top">
+        <div style="flex:1;min-width:0">
+          <div class="pin-name">${esc(c.name)}</div>
+          ${c.location?`<div class="pin-neighborhood"><i class="ti ti-map-pin" style="font-size:11px"></i> ${esc(c.location)}</div>`:''}
+          ${c.address
+            ?`<a class="pin-addr-link" href="${mapsUrl(c)}" target="_blank"><i class="ti ti-map-2"></i>${esc(c.address)}<i class="ti ti-external-link" style="font-size:11px;opacity:.7"></i></a>`
+            :`<a class="pin-no-addr-link" href="${mapsUrl(c)}" target="_blank"><i class="ti ti-search"></i>Search "${esc(c.name)}" in Maps<i class="ti ti-external-link" style="font-size:11px;opacity:.7"></i></a>`
+          }
+        </div>
+        <div>${starsHtml(c.overall,13)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openMapAddr(){
+  const q=document.getElementById('map-addr-input').value.trim();
+  const h=document.getElementById('map-addr-hint');
+  if(!q){ h.textContent='Please enter an address or place name first.'; h.style.color='#C0392B'; setTimeout(()=>{h.textContent='Type any address or place and it will open in Google Maps.';h.style.color='';},2500); return; }
+  window.open('https://www.google.com/maps/search/'+encodeURIComponent(q),'_blank');
+}
+
+// ── CLOSE MODAL ON OVERLAY CLICK ──
+document.getElementById('edit-modal').addEventListener('click',function(e){ if(e.target===this) closeEditModal(); });
+
+// ── TOOLBAR: export / import buttons injected into header ──
+window.addEventListener('DOMContentLoaded',()=>{
+  const hdr=document.querySelector('.hdr');
+  const toolbar=document.createElement('div');
+  toolbar.style.cssText='margin-left:auto;display:flex;gap:6px;flex-shrink:0';
+  toolbar.innerHTML=`
+    <button onclick="exportData()" title="Export backup" style="background:none;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 10px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);font-family:var(--font-sans);display:flex;align-items:center;gap:4px"><i class="ti ti-download"></i> Export</button>
+    <button onclick="importData()" title="Import backup" style="background:none;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 10px;cursor:pointer;font-size:12px;color:var(--color-text-secondary);font-family:var(--font-sans);display:flex;align-items:center;gap:4px"><i class="ti ti-upload"></i> Import</button>`;
+  hdr.appendChild(toolbar);
+  loadCourts();
+});
+</script>
+</body>
+</html>
